@@ -1,0 +1,35 @@
+from VaR import ValueAtRisk
+from VaR import HistoricalVaR
+import pandas as pd
+import numpy as np
+import pandas_datareader.data as web
+import matplotlib.pyplot as plt
+
+if __name__ =='__main__':
+    print('--------Test Main----------')
+    weights = np.array([0.1,0.3,0.4,0.2])
+#    data = pd.read_csv('Data/portfolio.csv', index_col='date', dtype=float, parse_dates=True)
+stock = ['GOOG', 'FB', 'TSLA', 'AMZN']
+#data = web.DataReader(stock,data_source="yahoo",start='12/01/2017',end='12/31/2019')['Adj Close']
+data = web.DataReader(stock,data_source="yahoo",start='12/04/2017',end='09/01/2020')['Adj Close']
+#Arrange the data in descending order
+data=data.iloc[::1]
+print(data.round(2))
+
+print('--------data preview--------')
+print(data.head())
+print('\n--------Parametric Var--------')
+Demo = ValueAtRisk(0.95,data,weights)
+print('Covariance Matrix\n',Demo.covMatrix())
+print('Annualized VaR(Percentage): ',Demo.var()*100,'%')
+print('Annualized VaR(Dollar): ',Demo.var(marketValue=1000000))
+print('Daily VaR(Percentage): ',Demo.var(window = 1)*100,'%')
+print('Daily VaR(Dollar): ',Demo.var(marketValue=1000000,window = 1))
+print('Annualized VaR(Percentage) - Approximation: ',Demo.var(Approximation = True)* 100,'%')
+print('Annualized VaR(Dollar) - Approximation: ',Demo.var(Approximation = True,marketValue=1000000))
+print('\n--------Historical Var--------')
+HDemo = HistoricalVaR(0.95,data.as_matrix(),weights)
+print('VaR(Percentage): ',HDemo.var(),'%')
+print('Var(Dollar):',HDemo.var(marketValue = 1000000))
+print('100 day - VaR(Percentage): ',HDemo.var(window = 100)*100,'%')
+print('100 day - Var(Dollar):',HDemo.var(marketValue = 1000000,window = 100))
